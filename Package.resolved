@@ -1,0 +1,24 @@
+{
+  "originHash" : "a20fe3f5597cd1a719ebae587e0b0385201daa24176781a7b8cc7f30d2d0bc4f",
+  "pins" : [
+    {
+      "identity" : "codescanner",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/twostraws/CodeScanner",
+      "state" : {
+        "revision" : "5e886430238944c7200fc9e10dbf2d9550dba865",
+        "version" : "2.5.2"
+      }
+    },
+    {
+      "identity" : "fhirmodels",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/FHIRModels.git",
+      "state" : {
+        "revision" : "a05392269b630a8d661bda720d149fee2f0257e2",
+        "version" : "0.8.0"
+      }
+    }
+  ],
+  "version" : 3
+}
