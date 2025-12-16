@@ -32,7 +32,7 @@ let package = Package(
 				.product(name: "SMARTHealthCard", package: "SMARTHealthCard"),
 				.product(name: "CodeScanner", package: "CodeScanner"),
 			],
-			resources: [.copy("Resources")]
+			resources: [.process("BundleResources")]
 		),
         .testTarget(
             name: "SMARTHealthCardUITests",
