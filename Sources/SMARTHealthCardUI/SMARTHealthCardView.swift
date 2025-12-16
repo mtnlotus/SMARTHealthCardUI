@@ -12,6 +12,7 @@ import ModelsR4
 public struct SMARTHealthCardView: View {
 	
 	@Environment(HealthCardModel.self) private var healthCardModel
+	@Environment(TrustManager.self) private var trustManager
 	
 	private var verificationFooter: String {
 		guard healthCardModel.hasVerifiedSignature == true else { return "" }
@@ -27,34 +28,7 @@ public struct SMARTHealthCardView: View {
 	
     public var body: some View {
 		if let smartHealthCard = healthCardModel.smartHealthCard {
-			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
-				VStack(alignment: .leading) {
-					Text("Source").foregroundStyle(.secondary)
-					Text("\(smartHealthCard.issuer)")
-				}
-				HStack {
-					Text("Status").foregroundStyle(.secondary)
-					Spacer()
-					Text("\(healthCardModel.hasVerifiedSignature == true ? "✅ Valid Signature" : "❌ Not Verified")")
-				}
-				if let issueDate = smartHealthCard.issueDate {
-					HStack {
-						Text("Issued").foregroundStyle(.secondary)
-						Spacer()
-						Text("\(issueDate.mediumDateTimeFormat)")
-					}
-				}
-				if let expiresDate = smartHealthCard.expiresDate {
-					HStack {
-						Text("Expires").foregroundStyle(.secondary)
-						Spacer()
-						Text("\(expiresDate.mediumDateTimeFormat)")
-					}
-				}
-			}
-			.task {
-				try? await healthCardModel.verifySignature()
-			}
+			VerificationView()
 			
 			Section(header: Text("Health Card Data"), footer: Text(healthDataFooter)) {
 				if healthCardModel.resourceModels.isEmpty {
@@ -82,13 +56,17 @@ public struct SMARTHealthCardView: View {
 }
 
 #Preview {
-	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: "567629095243206034602924374044603122295953265460346029254077280433602870286471674522280928613331456437653141590640220306450459085643550341424541364037063665417137241236380304375622046737407532323925433443326057360106452933611232742428535076646807087032295340297766034360387620367604083623090777534474543410305568644241501110447744664105724022382861547567080808060357087552625412212008500658646175062007693212557709236965764338520753410534291207352263043406383352382423731271204004533309704237047154606845454320404021772250071128233757576461003135576240683859582603227464303105627272356605106976591140336306037109585555296611695728422553360565220927654269323537445526520320685061376758736271622122303240683642252126602135453271405909410064744133557733330774521066662759231274310562007534441243623707317543677443333335555325273655083721056073772555683354455322543072293224072043063652714431447240254265294429683821120340730653777272122731535075344561770628117275580473083126637476324336646954642344682233333057446126065563081034546567125767412903455611582305557729335957272474642834206263680527523958623232072966450711425557210565762004263825262609122205267345437639302629602542283768530575357304237474664006336260050358053037087769775541310426600872656763062220124174383028226961060750123166742260045075303227767376374469730703745767375862505028443040005054296360635367427708335010213140242430047009573557057323630412412233270065603474013426456804534039770774382222252421252865267057397452334224676120736432283107345276335673084577733172760471673144304550525307770970362973085867375777504108125641610521693520")
+	@Previewable @State var terminologyManager = TerminologyManager()
+	@Previewable @State var trustManager = TrustManager()
+	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	NavigationStack {
 		List {
 			SMARTHealthCardView()
-				.environment(healthCareModel)
 		}
 		.navigationTitle("SMART Health Card")
+		.environment(terminologyManager)
+		.environment(trustManager)
+		.environment(healthCareModel)
 	}
 }

@@ -311,12 +311,18 @@ extension CodeableConcept {
 		else { return nil }
 		
 		switch systemURI {
-		case "http://hl7.org/fhir/sid/cvx":
-			return "CVX"
-		case "http://loinc.org":
-			return "LOINC"
 		case "http://snomed.info/sct":
 			return "SNOMED"
+		case "http://hl7.org/fhir/sid/icd-10-cm":
+			return "ICD-10"
+		case "http://hl7.org/fhir/sid/icd-9-cm":
+			return "ICD-9"
+		case "http://loinc.org":
+			return "LOINC"
+		case "http://www.nlm.nih.gov/research/umls/rxnorm":
+			return "RxNorm"
+		case "http://hl7.org/fhir/sid/cvx":
+			return "CVX"
 		default :
 			return nil
 		}
