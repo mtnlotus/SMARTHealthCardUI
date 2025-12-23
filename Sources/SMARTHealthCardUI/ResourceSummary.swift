@@ -9,6 +9,7 @@ import SwiftUI
 import ModelsR4
 
 struct ResourceSummary: View {
+	@Environment(HealthCardModel.self) private var healthCardModel
 	@Environment(TerminologyManager.self) private var terminology
 	
 	var resourceModel: ResourceModel
@@ -20,17 +21,17 @@ struct ResourceSummary: View {
 				HStack(spacing: 10) {
 					if let icon = resourceModel.icon {
 						icon
+							.font(.title2)
+							.foregroundColor(resourceModel.color ?? .primary)
 					}
-					Text(resourceModel.resourceType)
+					Text(resourceModel.title)
+						.font(.headline)
+						.foregroundColor(.primary)
 					Spacer()
 				}
-				.bold()
-				.foregroundColor(resourceModel.color ?? .primary)
 			}
 			.navigationLinkIndicatorVisibility(showNavigation ? .visible : .hidden)
 			
-			Text(resourceModel.title)
-				.font(.headline)
 			if let subtitle = resourceModel.subtitle {
 				Text(subtitle)
 					.font(.footnote)
@@ -42,17 +43,24 @@ struct ResourceSummary: View {
 		}
 		.multilineTextAlignment(.leading)
 		.task {
-			try? await resourceModel.lookupTitle(using: terminology)
-			try? await resourceModel.lookupDetail(using: terminology)
+			do {
+				try await resourceModel.lookupTitle(using: terminology)
+				try await resourceModel.lookupDetail(using: terminology)
+			}
+			catch {
+				healthCardModel.addMessage(error)
+			}
 		}
 	}
 }
 
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
-	let condition = Condition(subject: Reference(reference: "resource:0"))
+	let condition = Condition(code: CodeableConcept(text: "High Cholesterol"), recordedDate : try? DateTime(date: Date.now).asPrimitive(), subject: Reference(reference: "resource:0"))
+	let medication = MedicationRequest(authoredOn: try? DateTime(date: Date.now).asPrimitive(), intent: MedicationRequestIntent.order.asPrimitive(), medication: .codeableConcept(CodeableConcept(text: "Aspirin")), status: MedicationrequestStatus.active.asPrimitive(), subject: Reference(reference: "resource:0"))
 	List {
 		ResourceSummary(resourceModel: ResourceModel(condition))
+		ResourceSummary(resourceModel: ResourceModel(medication))
 	}
 	.environment(terminologyManager)
 }

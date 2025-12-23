@@ -128,7 +128,7 @@ extension Condition: DisplayableResource {
 		formatter.dateStyle = .long
 		formatter.timeStyle = .none
 		formatter.timeZone = Calendar.current.timeZone
-		return "Starting \(formatter.string(from: recordedDate))"
+		return "Recorded \(formatter.string(from: recordedDate))"
 	}
 	
 }
@@ -179,6 +179,28 @@ extension Immunization: DisplayableResource {
 	
 }
 
+extension MedicationRequest: DisplayableResource {
+	
+	public var titleCode: CodeableConcept? {
+		guard case .codeableConcept(let codeable) = self.medication
+		else { return nil }
+		
+		return codeable
+	}
+	
+	public var subtitle: String? {
+		guard let authoredOn = try? self.authoredOn?.value?.asNSDate()
+		else { return nil }
+		
+		let formatter = DateFormatter()
+		formatter.dateStyle = .medium
+		formatter.timeStyle = .none
+		formatter.timeZone = Calendar.current.timeZone
+		return "Prescribed \(formatter.string(from: authoredOn))"
+	}
+	
+}
+
 extension Observation: DisplayableResource {
 	
 	public var titleCode: CodeableConcept? {
@@ -216,7 +238,10 @@ extension Observation: DisplayableResource {
 	
 	@MainActor
 	public func lookupDetail(using terminology: TerminologyManager?) async throws -> String? {
-		if let obsComponents = component, !obsComponents.isEmpty {
+		if case .codeableConcept(let codeable) = self.value {
+			return try await terminology?.lookupDisplayText(for: codeable) ?? codeable.displayString
+		}
+		else if let obsComponents = component, !obsComponents.isEmpty {
 		var componentDisplay = ""
 		   for component in obsComponents {
 			   if let codeString = try await terminology?.lookupDisplayText(for: component.code) ?? component.code.displayString,
@@ -298,8 +323,12 @@ extension Quantity {
 extension CodeableConcept {
 	
 	internal var displayString: String? {
-		if let coding = coding?.first {
-			return "\(systemDisplay(coding.system) ?? "") \(coding.code?.value?.string ?? "")"
+		if let text = self.text?.value?.string {
+			return text
+		}
+		else if let coding = coding?.first {
+			return coding.display?.value?.string
+					?? "\(systemDisplay(coding.system) ?? "") \(coding.code?.value?.string ?? "")"
 		}
 		else {
 			return nil

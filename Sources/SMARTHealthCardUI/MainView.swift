@@ -31,10 +31,10 @@ struct MainView: View {
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
 	@Previewable @State var trustManager = TrustManager()
-	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
+	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	MainView()
 		.environment(terminologyManager)
 		.environment(trustManager)
-		.environment(healthCareModel)
+		.environment(healthCardModel)
 }

@@ -42,13 +42,10 @@ public struct SMARTHealthCardView: View {
 			}
 		}
 		
-		if let error = healthCardModel.error {
-			Section("Error Messages") {
-				if let jwsError = error as? JWSError {
-					Text("\(jwsError.description)")
-				}
-				else {
-					Text("\(error.localizedDescription)")
+		if !healthCardModel.messages.isEmpty {
+			Section("Messages") {
+				ForEach(healthCardModel.messages) { message in
+					Text(message.text)
 				}
 			}
 		}

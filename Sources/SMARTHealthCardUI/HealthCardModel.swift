@@ -9,6 +9,7 @@ import SwiftUI
 import SMARTHealthCard
 import class ModelsR4.Resource
 import CryptoKit
+import OSLog
 
 @Observable public class HealthCardModel {
 	
@@ -16,24 +17,29 @@ import CryptoKit
 		self.numericSerialization = numericSerialization
 	}
 	
-	/// JWS Size = ((Total Data Bits - 76 bits reserved) * 6/20 bits per numeric character * 1/2 JWS character per numeric character = (Total Data Bits - 76)*3/20
+	/// JWS character size, where each character is represented by 2 digits.
 	public var jwsCharacterCount: Int {
-		if let dataBits = numericSerialization {
-			return (dataBits.count - 76) * 3 / 20
+		if let numericData = numericSerialization {
+			let dataString = String(numericData.trimmingPrefix("shc:/"))
+			let characterCount: Int = dataString.count / 2
+			return characterCount
 		}
 		return 0
 	}
 	
 	public var numericSerialization: String? {
 		didSet {
-			self.error = nil
+			self.messages = []
 			do {
 				if let data = numericSerialization {
+					let dataString = String(data.trimmingPrefix("shc:/"))
+					Logger.statistics.debug("Numerical serialization contains \(dataString.count) digits")
+					Logger.statistics.debug("Numerical serialization contains \(self.jwsCharacterCount) characters of data")
+					
 					let jws = try JWS(fromNumeric: data)
 					self.jws = jws
 					self.smartHealthCard = try JSONDecoder().decode(SMARTHealthCardPayload.self, from: jws.payload)
 					self.jwsHeader = try JSONDecoder().decode(JWSHeader.self, from: Base64URL.decode(jws.header))
-//					verifySignature()
 				}
 				else {
 					jws = nil
@@ -43,7 +49,7 @@ import CryptoKit
 				}
 			}
 			catch {
-				self.error = error
+				addMessage(error)
 			}
 		}
 	}
@@ -56,7 +62,14 @@ import CryptoKit
 	
 	public private(set) var hasVerifiedSignature: Bool?
 	
-	public private(set) var error: Error?
+	public private(set) var messages: [ErrorMessage] = []
+	
+	public func addMessage(_ message: String) {
+		self.messages.append(.init(message: message))
+	}
+	public func addMessage(_ error: Error) {
+		self.messages.append(.init(error: error))
+	}
 	
 	public var fhirResources: [Resource] {
 		smartHealthCard?.vc.credentialSubject.fhirBundle?.entry?.compactMap { $0.resource?.get() } ?? []
@@ -67,12 +80,15 @@ import CryptoKit
 	}
 	
 	@MainActor
-	public func verifySignature() async throws {
-		do {
-			self.hasVerifiedSignature = try await verifySignatureAsync()
-		}
-		catch {
-			self.error = error
+	public func verifySignature() async {
+		if hasVerifiedSignature == nil {
+			do {
+				self.hasVerifiedSignature = try await verifySignatureAsync()
+			}
+			catch {
+				self.hasVerifiedSignature = false
+				addMessage(error)
+			}
 		}
 	}
 	
@@ -81,10 +97,6 @@ import CryptoKit
 		guard let payload = smartHealthCard, let header = jwsHeader else {
 			return false
 		}
-//		let issuerIdentifier = smartHealthCard.iss
-//        guard URLIsTrusted(url: issuerIdentifier) else {
-//            throw VerificationError.untrustedIssuer(issuerIdentifier)
-//        }
 		
 		// The standard URL to locate an issuer's signing public keys is
 		// constructed by appending `/.well-known/jwks.json` to
@@ -94,26 +106,21 @@ import CryptoKit
 			throw VerificationError.unableToParseIssuerURL(urlString)
 		}
 		
-		let configuration = URLSessionConfiguration.ephemeral
-		configuration.timeoutIntervalForResource = 5.0
-		let session = URLSession(configuration: configuration)
-		let (data, _) = try await session.data(from: url, delegate: nil)
-		let keySet = try JSONDecoder().decode(JWKSet.self, from: data)
-		let signingKey = try keySet.key(with: header.kid)
+		let signingKey: JWK
+		do {
+			let configuration = URLSessionConfiguration.ephemeral
+			configuration.timeoutIntervalForResource = 5.0
+			let session = URLSession(configuration: configuration)
+			let (data, _) = try await session.data(from: url, delegate: nil)
+			let keySet = try JSONDecoder().decode(JWKSet.self, from: data)
+			signingKey = try keySet.key(with: header.kid)
+		}
+		catch {
+			throw VerificationError.noPublicKeyFound
+			return false
+		}
 		
 		return try signatureIsValid(signingKey: signingKey)
-	}
-	
-	/*
-	 TODO: lookup registered issuers
-	 */
-	private func URLIsTrusted(url: String) -> Bool {
-		// The set of issuers to trust.
-		let trustedURLs: Set = [
-			"https://smarthealth.cards/examples/issuer",
-			"https://spec.smarthealth.cards/examples/issuer"
-		]
-		return trustedURLs.contains(url)
 	}
 	
 	private func signatureIsValid(signingKey: JWK) throws -> Bool {

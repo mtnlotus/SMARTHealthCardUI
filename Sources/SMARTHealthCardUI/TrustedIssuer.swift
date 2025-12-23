@@ -14,4 +14,13 @@ public struct TrustedIssuer: Codable {
 	public let canonical_iss: String?
 	public let name: String
 	public let website: String?
+	public var isTrusted: Bool?
+	
+	public init(iss: String, canonical_iss: String? = nil, name: String, website: String? = nil, isTrusted: Bool = false) {
+		self.iss = iss
+		self.canonical_iss = canonical_iss
+		self.name = name
+		self.website = website
+		self.isTrusted = isTrusted
+	}
 }

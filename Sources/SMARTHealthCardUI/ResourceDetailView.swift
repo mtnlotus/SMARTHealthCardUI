@@ -39,15 +39,15 @@ public struct ResourceDetailView: View {
 				}
 			}
 		}
-		.navigationTitle("Resource Detail")
+		.navigationTitle(resourceModel.resourceType)
     }
 }
 
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
-	let condition = Condition(subject: Reference(reference: "resource:0"))
-	List {
+	let condition = Condition(code: CodeableConcept(text: "High Cholesterol"), recordedDate : try? DateTime(date: Date.now).asPrimitive(), subject: Reference(reference: "resource:0"))
+	NavigationStack {
 		ResourceDetailView(condition)
+			.environment(terminologyManager)
 	}
-	.environment(terminologyManager)
 }

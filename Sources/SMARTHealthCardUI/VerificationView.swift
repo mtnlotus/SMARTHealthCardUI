@@ -18,7 +18,7 @@ struct VerificationView: View {
 	}
 	
 	@ViewBuilder private var trustedImage: some View {
-		if trustManager.isTrusted(iss: healthCardModel.smartHealthCard?.issuer) {
+		if true == trustManager.isTrusted(iss: healthCardModel.smartHealthCard?.issuer) {
 			Image(systemName: "checkmark.seal")
 				.font(.title3)
 				.foregroundStyle(.green)
@@ -51,10 +51,10 @@ struct VerificationView: View {
 	}
 	
 	@ViewBuilder private func issuerNameView(iss: String) -> some View {
-		let trustedIssuer = trustManager.trustedIssuer(iss: iss)
-		let name = trustedIssuer?.name ?? URL(string: iss)?.host() ?? iss
+		let issuer = trustManager.issuer(iss: iss)
+		let name = issuer?.name ?? URL(string: iss)?.host() ?? iss
 		var nameLink = name
-		if let website = trustedIssuer?.website {
+		if let website = issuer?.website {
 			nameLink = "[\(name)](\(website))"
 		}
 		return HStack {
@@ -68,7 +68,7 @@ struct VerificationView: View {
 		if let smartHealthCard = healthCardModel.smartHealthCard {
 			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
 				VStack(alignment: .leading) {
-					Text("Source")
+					Text("Credentials signed by")
 						.foregroundStyle(.secondary)
 					issuerNameView(iss: smartHealthCard.issuer)
 				}
@@ -94,7 +94,12 @@ struct VerificationView: View {
 				}
 			}
 			.task {
-				try? await healthCardModel.verifySignature()
+				do {
+					try await healthCardModel.verifySignature()
+				}
+				catch {
+					healthCardModel.addMessage(error)
+				}
 			}
 		}
     }

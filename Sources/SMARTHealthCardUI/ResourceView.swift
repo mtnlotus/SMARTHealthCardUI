@@ -18,7 +18,7 @@ struct ResourceView: View {
 
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
-	let condition = Condition(subject: Reference(reference: "resource:0"))
+	let condition = Condition(code: CodeableConcept(text: "High Cholesterol"), recordedDate : try? DateTime(date: Date.now).asPrimitive(), subject: Reference(reference: "resource:0"))
 	List {
 		ResourceView(resourceModel: ResourceModel(condition))
 	}

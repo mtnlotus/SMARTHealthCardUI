@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import OSLog
 
 @Observable
-public class TrustManager {
+open class TrustManager {
 	
 	public private(set) var issuerDirectory: IssuerDirectory?
 	
@@ -17,31 +18,39 @@ public class TrustManager {
 	
 	public init() {}
 	
-	public func trustedIssuer(iss: String?) -> TrustedIssuer? {
+	public func issuer(iss: String?) -> TrustedIssuer? {
 		iss != nil ? issuerMap[iss!] : nil
 	}
 	
 	public func isTrusted(iss: String?) -> Bool {
-		iss != nil && issuerMap[iss!] != nil ? true : false
+		if let iss = iss, let issuer = issuerMap[iss], issuer.isTrusted == true {
+			return true
+		}
+		return false
+	}
+	
+	public func addIssuer(_ issuer: TrustedIssuer) {
+		issuerMap[issuer.iss] = issuer
+		if let canonical_iss = issuer.canonical_iss {
+			issuerMap[canonical_iss] = issuer
+		}
 	}
 	
 	public func loadIssuerDirectory() async throws {
 		guard let fileURL = Bundle.module.url(forResource: "vci-issuers", withExtension: "json")
 		else {
+			Logger.verification.error("Failed to read Issuer Directory file from app bundle.")
 			//TODO: throw error
 			return
 		}
 		
 		issuerDirectory = try JSONDecoder().decode(IssuerDirectory.self, from: try! Data(contentsOf: fileURL))
-		for issuer in issuerDirectory?.participating_issuers ?? [] {
-			issuerMap[issuer.iss] = issuer
-			if let canonical_iss = issuer.canonical_iss {
-				issuerMap[canonical_iss] = issuer
-			}
+		for var issuer in issuerDirectory?.participating_issuers ?? [] {
+			issuer.isTrusted = true
+			addIssuer(issuer)
 		}
 		
-		//TODO: debug logger
-		print("Loaded Issuer Directory with \(issuerDirectory?.participating_issuers.count ?? 0) entries.")
+		Logger.statistics.info("Loaded Issuer Directory with \(self.issuerDirectory?.participating_issuers.count ?? 0) entries.")
 	}
 	
 }

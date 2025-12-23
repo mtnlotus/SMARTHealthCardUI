@@ -21,11 +21,13 @@ public class ResourceModel: Identifiable {
 	
 	public init(_ resource: Resource) {
 		self.resource = resource
-		title = type(of: resource).resourceType.rawValue
 		
-		if let displayableResource {
+		if let displayableResource = resource as? DisplayableResource {
 			title = displayableResource.title
 			detail = displayableResource.detail
+		}
+		else {
+			title = type(of: resource).resourceType.rawValue
 		}
 	}
 	
