@@ -5,11 +5,12 @@
 //  Created by David Carlson on 11/19/25.
 //
 
+import CoreImage.CIFilterBuiltins
+import CryptoKit
 import SwiftUI
 import SMARTHealthCard
 import class ModelsR4.Resource
 import class ModelsR4.Bundle
-import CryptoKit
 import OSLog
 
 @Observable public class HealthCardModel {
@@ -53,6 +54,26 @@ import OSLog
 				addMessage(error)
 			}
 		}
+	}
+	
+	public var qrCodeImage: UIImage? {
+		if let qrData = numericSerialization?.data(using: .utf8) {
+			let context = CIContext()
+			let qrCodeGenerator = CIFilter.qrCodeGenerator()
+			qrCodeGenerator.message = qrData
+			qrCodeGenerator.correctionLevel = "L"
+			 
+			if let outputImage = qrCodeGenerator.outputImage {
+				if let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
+					return UIImage(cgImage: cgImage)
+				}
+			}
+		}
+		return nil
+	}
+	
+	public var qrCodeImageAsPNG: Data? {
+		qrCodeImage?.pngData()
 	}
 	
 	public private(set) var jws: JWS?

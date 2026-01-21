@@ -66,6 +66,22 @@ struct VerificationView: View {
 		}
 	}
 	
+	@ViewBuilder private var qrCodeImage: some View {
+		if let uiImage = healthCardModel.qrCodeImage {
+			Section {
+				HStack {
+					Spacer()
+					Image(uiImage: uiImage)
+						.interpolation(.none)
+						.resizable()
+						.scaledToFit()
+						.frame(width: 200, height: 200)
+					Spacer()
+				}
+			}
+		}
+	}
+	
     var body: some View {
 		if let smartHealthCard = healthCardModel.healthCardPayload {
 			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
@@ -94,6 +110,8 @@ struct VerificationView: View {
 						Text("\(expiresDate.mediumDateTimeFormat)")
 					}
 				}
+				
+				qrCodeImage
 			}
 			.task {
 				await healthCardModel.verifySignature()
