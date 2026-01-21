@@ -9,16 +9,21 @@ import SwiftUI
 import SMARTHealthCard
 
 struct VerificationView: View {
-	@Environment(HealthCardModel.self) private var healthCardModel
 	@Environment(TrustManager.self) private var trustManager
 
+	private let healthCardModel: HealthCardModel
+	
+	init(for healthCardModel: HealthCardModel) {
+		self.healthCardModel = healthCardModel
+	}
+	
 	private var verificationFooter: String {
 		guard healthCardModel.hasVerifiedSignature == true else { return "" }
 		return "Verified records have not been changed since originally created."
 	}
 	
 	@ViewBuilder private var trustedImage: some View {
-		if true == trustManager.isTrusted(iss: healthCardModel.smartHealthCard?.issuer) {
+		if true == trustManager.isTrusted(iss: healthCardModel.healthCardPayload?.issuer) {
 			Image(systemName: "checkmark.seal")
 				.font(.title3)
 				.foregroundStyle(.green)
@@ -26,7 +31,7 @@ struct VerificationView: View {
 	}
 	
 	@ViewBuilder private var unknownTrustImage: some View {
-		if false == trustManager.isTrusted(iss: healthCardModel.smartHealthCard?.issuer) {
+		if false == trustManager.isTrusted(iss: healthCardModel.healthCardPayload?.issuer) {
 			Image(systemName: "xmark.seal")
 				.font(.title3)
 				.foregroundStyle(.red)
@@ -53,11 +58,8 @@ struct VerificationView: View {
 	@ViewBuilder private func issuerNameView(iss: String) -> some View {
 		let issuer = trustManager.issuer(iss: iss)
 		let name = issuer?.name ?? URL(string: iss)?.host() ?? iss
-		var nameLink = name
-		if let website = issuer?.website {
-			nameLink = "[\(name)](\(website))"
-		}
-		return HStack {
+		let nameLink = issuer?.website != nil ? "[\(name)](\(issuer!.website!))" : name
+		HStack {
 			trustedImage
 			// Use LocalizedStringKey to render markdown in nameLink.
 			Text(LocalizedStringKey(nameLink))
@@ -65,7 +67,7 @@ struct VerificationView: View {
 	}
 	
     var body: some View {
-		if let smartHealthCard = healthCardModel.smartHealthCard {
+		if let smartHealthCard = healthCardModel.healthCardPayload {
 			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
 				VStack(alignment: .leading) {
 					Text("Credentials signed by")
@@ -94,12 +96,7 @@ struct VerificationView: View {
 				}
 			}
 			.task {
-				do {
-					try await healthCardModel.verifySignature()
-				}
-				catch {
-					healthCardModel.addMessage(error)
-				}
+				await healthCardModel.verifySignature()
 			}
 		}
     }
@@ -108,12 +105,11 @@ struct VerificationView: View {
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
 	@Previewable @State var trustManager = TrustManager()
-	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
+	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	List {
-		VerificationView()
+		VerificationView(for: healthCardModel)
 	}
 	.environment(terminologyManager)
 	.environment(trustManager)
-	.environment(healthCareModel)
 }

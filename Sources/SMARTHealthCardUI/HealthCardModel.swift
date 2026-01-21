@@ -8,6 +8,7 @@
 import SwiftUI
 import SMARTHealthCard
 import class ModelsR4.Resource
+import class ModelsR4.Bundle
 import CryptoKit
 import OSLog
 
@@ -38,12 +39,12 @@ import OSLog
 					
 					let jws = try JWS(fromNumeric: data)
 					self.jws = jws
-					self.smartHealthCard = try JSONDecoder().decode(SMARTHealthCardPayload.self, from: jws.payload)
+					self.healthCardPayload = try JSONDecoder().decode(HealthCardPayload.self, from: jws.payload)
 					self.jwsHeader = try JSONDecoder().decode(JWSHeader.self, from: Base64URL.decode(jws.header))
 				}
 				else {
 					jws = nil
-					smartHealthCard = nil
+					healthCardPayload = nil
 					jwsHeader = nil
 					hasVerifiedSignature = nil
 				}
@@ -58,7 +59,16 @@ import OSLog
 	
 	public private(set) var jwsHeader: JWSHeader?
 	
-	public private(set) var smartHealthCard: SMARTHealthCardPayload?
+	public private(set) var healthCardPayload: HealthCardPayload? {
+		didSet {
+			// TODO: delegate call-back
+			// Maybe use a @Published var that will trigger Summary view .task
+			
+			if healthCardPayload != nil {
+				Logger.statistics.info("Completed parsing SMART Health Card, found \(self.fhirResources.count) FHIR resources")
+			}
+		}
+	}
 	
 	public private(set) var hasVerifiedSignature: Bool?
 	
@@ -72,7 +82,7 @@ import OSLog
 	}
 	
 	public var fhirResources: [Resource] {
-		smartHealthCard?.vc.credentialSubject.fhirBundle?.entry?.compactMap { $0.resource?.get() } ?? []
+		healthCardPayload?.vc.credentialSubject.fhirBundle?.entry?.compactMap { $0.resource?.get() } ?? []
 	}
 	
 	public var resourceModels: [ResourceModel] {
@@ -94,7 +104,7 @@ import OSLog
 	
 	@MainActor
 	private func verifySignatureAsync() async throws -> Bool {
-		guard let payload = smartHealthCard, let header = jwsHeader else {
+		guard let payload = healthCardPayload, let header = jwsHeader else {
 			return false
 		}
 		
@@ -117,7 +127,6 @@ import OSLog
 		}
 		catch {
 			throw VerificationError.noPublicKeyFound
-			return false
 		}
 		
 		return try signatureIsValid(signingKey: signingKey)

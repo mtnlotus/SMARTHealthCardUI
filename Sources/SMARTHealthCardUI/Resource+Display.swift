@@ -21,13 +21,15 @@ public protocol DisplayableResource: Resource {
 	@MainActor func lookupDetail(using terminology: TerminologyManager?) async throws -> String?
 }
 
-extension Resource {
+extension ResourceType {
 	public var icon: Image? {
-		switch type(of: self).resourceType {
+		switch self {
+		case .allergyIntolerance:
+			return Image(systemName: "allergens")
 		case .condition:
 			return Image(systemName: "stethoscope")
 		case .goal:
-			return Image(systemName: "flag")
+			return Image(systemName: "target")
 		case .immunization:
 			return Image(systemName: "cross.vial")
 		case .medicationRequest:
@@ -36,13 +38,21 @@ extension Resource {
 			return Image(systemName: "checkmark.rectangle")
 		case .patient:
 			return Image(systemName: "person")
+		case .practitioner:
+			return Image(systemName: "person.2")
+		case .procedure:
+			return Image(systemName: "ivfluid.bag")
+		case .serviceRequest:
+			return Image(systemName: "checklist")
 		default:
 			return nil
 		}
 	}
 	
 	public var color: Color? {
-		switch type(of: self).resourceType {
+		switch self {
+		case .allergyIntolerance:
+			return .teal
 		case .condition:
 			return .purple
 		case .goal:
@@ -55,9 +65,25 @@ extension Resource {
 			return .orange
 		case .patient:
 			return .blue
+		case .practitioner:
+			return .blue
+		case .procedure:
+			return .cyan
+		case .serviceRequest:
+			return .blue
 		default:
 			return nil
 		}
+	}
+}
+
+extension Resource {
+	public var icon: Image? {
+		type(of: self).resourceType.icon
+	}
+	
+	public var color: Color? {
+		type(of: self).resourceType.color
 	}
 }
 	
@@ -110,6 +136,37 @@ extension Patient: DisplayableResource {
 		formatter.dateStyle = .long
 		formatter.timeStyle = .none
 		return "\(formatter.string(from: displayDate))"
+	}
+	
+}
+
+extension Practitioner: DisplayableResource {
+	
+	public var title: String {
+		name?.first?.fullName ?? type(of: self).resourceType.rawValue
+	}
+	
+}
+
+extension AllergyIntolerance: DisplayableResource {
+	
+	public var titleCode: CodeableConcept? {
+		self.code
+	}
+	
+	public var subtitle: String? {
+		guard case .dateTime(let dateTime) = self.onset, let nsDate = try? dateTime.value?.asNSDate()
+		else { return nil }
+		
+		let formatter = DateFormatter()
+		formatter.dateStyle = .long
+		formatter.timeStyle = .none
+		formatter.timeZone = Calendar.current.timeZone
+		return "\(formatter.string(from: nsDate))"
+	}
+	
+	public var detail: String? {
+		self.criticality?.value?.rawValue
 	}
 	
 }
@@ -201,6 +258,14 @@ extension MedicationRequest: DisplayableResource {
 	
 }
 
+extension Medication: DisplayableResource {
+	
+	public var titleCode: CodeableConcept? {
+		self.code
+	}
+	
+}
+
 extension Observation: DisplayableResource {
 	
 	public var titleCode: CodeableConcept? {
@@ -257,6 +322,25 @@ extension Observation: DisplayableResource {
 	   else {
 		   return nil
 	   }
+	}
+	
+}
+
+extension ServiceRequest: DisplayableResource {
+	
+	public var titleCode: CodeableConcept? {
+		self.code
+	}
+	
+	public var subtitle: String? {
+		guard let authoredOn = try? self.authoredOn?.value?.asNSDate()
+		else { return nil }
+		
+		let formatter = DateFormatter()
+		formatter.dateStyle = .medium
+		formatter.timeStyle = .none
+		formatter.timeZone = Calendar.current.timeZone
+		return "Authored \(formatter.string(from: authoredOn))"
 	}
 	
 }

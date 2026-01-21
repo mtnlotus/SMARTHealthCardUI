@@ -8,17 +8,23 @@
 import SwiftUI
 import ModelsR4
 
-struct MainView: View {
+public struct MainView: View {
 	
-	var body: some View {
+	@State private var healthCardModel: HealthCardModel
+	
+	public init(for healthCardModel: HealthCardModel? = nil) {
+		self.healthCardModel = healthCardModel ?? HealthCardModel()
+	}
+	
+	public var body: some View {
 		NavigationStack {
 			List {
 				Section {
-					QRCodeScannerButton()
+					QRCodeScannerButton(for: healthCardModel)
 				}
 				.listRowBackground(Color.clear)
 				
-				SMARTHealthCardView()
+				SMARTHealthCardView(for: healthCardModel)
 			}
 			.navigationDestination(for: Resource.self) { resource in
 				ResourceDetailView(resource)
@@ -33,8 +39,7 @@ struct MainView: View {
 	@Previewable @State var trustManager = TrustManager()
 	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
-	MainView()
+	MainView(for: healthCardModel)
 		.environment(terminologyManager)
 		.environment(trustManager)
-		.environment(healthCardModel)
 }

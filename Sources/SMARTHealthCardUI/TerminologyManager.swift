@@ -68,9 +68,9 @@ public class TerminologyManager {
 	private func loadCachedTerminology() {
 		// Load terminology in priority order if duplicates are present across sources,
 		// e.g. consumer display prioritized over the same code from other sources.
-		try? codingDisplayMap.merge(TerminologyManager.consumerDisplayNames) { (current, _) in current }
-		try? codingDisplayMap.merge(TerminologyManager.cachedDisplayNames) { (current, _) in current }
-		try? codingDisplayMap.merge(TerminologyManager.otherDisplayNames) { (current, _) in current }
+		codingDisplayMap.merge(TerminologyManager.consumerDisplayNames) { (current, _) in current }
+		codingDisplayMap.merge(TerminologyManager.cachedDisplayNames) { (current, _) in current }
+		codingDisplayMap.merge(TerminologyManager.otherDisplayNames) { (current, _) in current }
 		
 		// load FHIR ValueSets
 		for fileName in TerminologyManager.valueSetFileNames {

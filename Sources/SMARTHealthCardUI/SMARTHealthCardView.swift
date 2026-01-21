@@ -11,8 +11,9 @@ import ModelsR4
 
 public struct SMARTHealthCardView: View {
 	
-	@Environment(HealthCardModel.self) private var healthCardModel
 	@Environment(TrustManager.self) private var trustManager
+	
+	private let healthCardModel: HealthCardModel
 	
 	private var verificationFooter: String {
 		guard healthCardModel.hasVerifiedSignature == true else { return "" }
@@ -24,11 +25,13 @@ public struct SMARTHealthCardView: View {
 		return "QR Code contains \(healthCardModel.jwsCharacterCount) characters (max 1195)"
 	}
 	
-	public init() { }
+	public init(for healthCardModel: HealthCardModel) {
+		self.healthCardModel = healthCardModel
+	}
 	
     public var body: some View {
-		if let smartHealthCard = healthCardModel.smartHealthCard {
-			VerificationView()
+		if healthCardModel.healthCardPayload != nil {
+			VerificationView(for: healthCardModel)
 			
 			Section(header: Text("Health Card Data"), footer: Text(healthDataFooter)) {
 				if healthCardModel.resourceModels.isEmpty {
@@ -55,15 +58,17 @@ public struct SMARTHealthCardView: View {
 #Preview {
 	@Previewable @State var terminologyManager = TerminologyManager()
 	@Previewable @State var trustManager = TrustManager()
-	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
+	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	NavigationStack {
 		List {
-			SMARTHealthCardView()
+			SMARTHealthCardView(for: healthCardModel)
 		}
 		.navigationTitle("SMART Health Card")
 		.environment(terminologyManager)
 		.environment(trustManager)
-		.environment(healthCareModel)
+		.navigationDestination(for: Resource.self) { resource in
+			ResourceDetailView(resource)
+		}
 	}
 }

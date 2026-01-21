@@ -7,15 +7,24 @@
 
 import SwiftUI
 import ModelsR4
+import OSLog
 
-struct ResourceSummary: View {
-	@Environment(HealthCardModel.self) private var healthCardModel
+public struct ResourceSummary: View {
 	@Environment(TerminologyManager.self) private var terminology
 	
-	var resourceModel: ResourceModel
-	var showNavigation: Bool = true
+	let resourceModel: ResourceModel
+	let showNavigation: Bool
 	
-	var body: some View {
+	public init(resourceModel: ResourceModel, showNavigation: Bool = true) {
+		self.resourceModel = resourceModel
+		self.showNavigation = showNavigation
+	}
+	
+	public init(_ resource: Resource) {
+		self.init(resourceModel: ResourceModel(resource))
+	}
+	
+	public var body: some View {
 		VStack(alignment: .leading, spacing: 5) {
 			NavigationLink(value: showNavigation ? resourceModel.resource : nil) {
 				HStack(spacing: 10) {
@@ -48,7 +57,7 @@ struct ResourceSummary: View {
 				try await resourceModel.lookupDetail(using: terminology)
 			}
 			catch {
-				healthCardModel.addMessage(error)
+				Logger.statistics.error("Failed to lookup resource details: \(error)")
 			}
 		}
 	}

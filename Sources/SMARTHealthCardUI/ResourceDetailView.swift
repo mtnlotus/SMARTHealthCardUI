@@ -39,15 +39,17 @@ public struct ResourceDetailView: View {
 				}
 			}
 		}
-		.navigationTitle(resourceModel.resourceType)
+		.navigationTitle(resourceModel.resourceType.rawValue)
     }
 }
 
 #Preview {
+	@Previewable @State var healthCareModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	@Previewable @State var terminologyManager = TerminologyManager()
 	let condition = Condition(code: CodeableConcept(text: "High Cholesterol"), recordedDate : try? DateTime(date: Date.now).asPrimitive(), subject: Reference(reference: "resource:0"))
 	NavigationStack {
 		ResourceDetailView(condition)
+			.environment(healthCareModel)
 			.environment(terminologyManager)
 	}
 }

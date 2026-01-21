@@ -7,6 +7,7 @@
 
 import SwiftUI
 import class ModelsR4.Resource
+import enum ModelsR4.ResourceType
 
 @Observable
 public class ResourceModel: Identifiable {
@@ -39,8 +40,8 @@ public class ResourceModel: Identifiable {
 		resource.color
 	}
 	
-	public var resourceType: String {
-		type(of: resource).resourceType.rawValue
+	public var resourceType: ResourceType {
+		type(of: resource).resourceType
 	}
 	
 	public var title: String

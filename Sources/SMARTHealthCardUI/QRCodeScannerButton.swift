@@ -11,13 +11,15 @@ internal import AVFoundation
 
 public struct QRCodeScannerButton: View {
 	
-	@Environment(HealthCardModel.self) private var healthCardModel
+	private let healthCardModel: HealthCardModel
 	
     @State private var isPresentingScanner = false
 	
 	@State private var isGalleryPresented = false
-
-	public init() { }
+	
+	public init(for healthCardModel: HealthCardModel) {
+		self.healthCardModel = healthCardModel
+	}
 	
     public var body: some View {
 		VStack(alignment: .center, spacing: 10) {
@@ -58,10 +60,11 @@ public struct QRCodeScannerButton: View {
 }
 
 #Preview {
-	@Previewable @State var healthCareModel = HealthCardModel()
+	@Previewable @State var healthCardModel = HealthCardModel()
 	VStack {
-		QRCodeScannerButton()
-			.padding(20)
-			.environment(healthCareModel)
+		List {
+			QRCodeScannerButton(for: healthCardModel)
+				.padding(20)
+		}
 	}
 }
