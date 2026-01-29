@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SMARTHealthCard
 import CodeScanner
 internal import AVFoundation
 
@@ -27,6 +28,7 @@ public struct QRCodeScannerButton: View {
 				   label: Text("Source")) {
 				Label("Camera", systemImage: "camera").tag(false)
 				Label("Photos", systemImage: "photo").tag(true)
+//				Label("Files", systemImage: "folder").tag(true)
 			}
 			.pickerStyle(SegmentedPickerStyle())
 			
@@ -36,6 +38,7 @@ public struct QRCodeScannerButton: View {
 					isPresentingScanner = true
 				})
 				{
+					// TODO: "Scan QR Code", "Select Photo", "Select File"
 					Text("Scan QR Code")
 						.font(.headline)
 						.padding()

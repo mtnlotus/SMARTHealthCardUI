@@ -15,11 +15,6 @@ public struct SMARTHealthCardView: View {
 	
 	private let healthCardModel: HealthCardModel
 	
-	private var verificationFooter: String {
-		guard healthCardModel.hasVerifiedSignature == true else { return "" }
-		return "Verified records have not been changed since originally created."
-	}
-	
 	private var healthDataFooter: String {
 		guard healthCardModel.jwsCharacterCount > 0 else { return "" }
 		return "QR Code contains \(healthCardModel.jwsCharacterCount) characters (max 1195)"
@@ -31,7 +26,7 @@ public struct SMARTHealthCardView: View {
 	
     public var body: some View {
 		if healthCardModel.healthCardPayload != nil {
-			VerificationView(for: healthCardModel)
+			VerificationSection(for: healthCardModel)
 			
 			Section(header: Text("Health Card Data"), footer: Text(healthDataFooter)) {
 				if healthCardModel.resourceModels.isEmpty {

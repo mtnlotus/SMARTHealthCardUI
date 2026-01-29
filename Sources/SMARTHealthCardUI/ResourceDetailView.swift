@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ModelsR4
+import SMARTHealthCard
 
 public struct ResourceDetailView: View {
 	private let resource: Resource
