@@ -1,15 +1,15 @@
 //
-//  SMARTHealthCardView.swift
-//  SMARTHealthCardDemo
+//  HealthCardDataSection.swift
+//  SMARTHealthCardUI
 //
-//  Created by David Carlson on 11/19/25.
+//  Created by David Carlson on 2/3/26.
 //
 
 import SwiftUI
 import SMARTHealthCard
 import ModelsR4
 
-public struct SMARTHealthCardView: View {
+public struct HealthCardDataSection: View {
 	
 	@Environment(TrustManager.self) private var trustManager
 	
@@ -24,20 +24,20 @@ public struct SMARTHealthCardView: View {
 		self.healthCardModel = healthCardModel
 	}
 	
-    public var body: some View {
+	public var body: some View {
 		if healthCardModel.healthCardPayload != nil {
-			VerificationSection(for: healthCardModel)
-			HealthCardDataSection(for: healthCardModel)
-		}
-		
-		if !healthCardModel.messages.isEmpty {
-			Section("Messages") {
-				ForEach(healthCardModel.messages) { message in
-					Text(message.text)
+			Section(header: Text("Health Card Data"), footer: Text(healthDataFooter)) {
+				if healthCardModel.resourceModels.isEmpty {
+					Text("No FHIR resources found")
+				}
+				else {
+					ForEach(healthCardModel.resourceModels) { model in
+						ResourceView(resourceModel: model)
+					}
 				}
 			}
 		}
-    }
+	}
 }
 
 #Preview {
@@ -47,7 +47,7 @@ public struct SMARTHealthCardView: View {
 	
 	NavigationStack {
 		List {
-			SMARTHealthCardView(for: healthCardModel)
+			HealthCardDataSection(for: healthCardModel)
 		}
 		.navigationTitle("SMART Health Card")
 		.environment(terminologyManager)
@@ -57,3 +57,4 @@ public struct SMARTHealthCardView: View {
 		}
 	}
 }
+

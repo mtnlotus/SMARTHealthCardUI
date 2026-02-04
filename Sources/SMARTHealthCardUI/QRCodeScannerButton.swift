@@ -23,34 +23,22 @@ public struct QRCodeScannerButton: View {
 	}
 	
     public var body: some View {
-		VStack(alignment: .center, spacing: 10) {
-			Picker(selection: $isGalleryPresented,
-				   label: Text("Source")) {
-				Label("Camera", systemImage: "camera").tag(false)
-				Label("Photos", systemImage: "photo").tag(true)
-//				Label("Files", systemImage: "folder").tag(true)
+		HStack(spacing: 10) {
+			Button(action: {
+				healthCardModel.numericSerialization = nil
+				isPresentingScanner = true
+			})
+			{
+				Text("Scan QR Code")
+					.font(.headline)
+					.padding(10)
 			}
-			.pickerStyle(SegmentedPickerStyle())
+			.buttonStyle(.borderedProminent)
 			
-			HStack(spacing: 10) {
-				Button(action: {
-					healthCardModel.numericSerialization = nil
-					isPresentingScanner = true
-				})
-				{
-					// TODO: "Scan QR Code", "Select Photo", "Select File"
-					Text("Scan QR Code")
-						.font(.headline)
-						.padding()
-				}
-				.buttonStyle(.borderedProminent)
-				Group {
-					isGalleryPresented ? Image(systemName: "photo") : Image(systemName: "camera")
-				}.font(.title)
-			}
-			.frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
+			Image(systemName: "camera")
+				.font(.title)
 		}
-		
+		.frame(minWidth: 200, maxWidth: .infinity, minHeight: 40)
         .sheet(isPresented: $isPresentingScanner) {
 			CodeScannerView(codeTypes: [.qr], scanMode: .oncePerCode, scanInterval: 1.0, showViewfinder: true, isGalleryPresented: $isGalleryPresented) { response in
                 if case let .success(result) = response {
@@ -67,7 +55,6 @@ public struct QRCodeScannerButton: View {
 	VStack {
 		List {
 			QRCodeScannerButton(for: healthCardModel)
-				.padding(20)
 		}
 	}
 }

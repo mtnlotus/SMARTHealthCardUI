@@ -22,10 +22,35 @@ public struct VerificationSection: View {
 		return "Verified records have not been changed since originally created."
 	}
 	
+	@State var showQRCode: Bool = false
+	
+	@ViewBuilder
+	private var showQRCodeButton: some View {
+		let buttonText = showQRCode ? "▼ Hide QR Code" : "▶︎ Show QR Code"
+		Button(action: {
+			withAnimation {
+				showQRCode.toggle()
+			}
+		}) {
+			Text(buttonText)
+				.textCase(.none)
+		}
+		.animation(.default, value: showQRCode)
+		.listRowInsets(.init(top: 5, leading: 5, bottom: 5, trailing: 5))
+	}
+	
     public var body: some View {
 		if let smartHealthCard = healthCardModel.healthCardPayload {
 			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
 				VerificationContent(for: healthCardModel)
+				
+				if let image = healthCardModel.qrCodeImage {
+					Section(header: showQRCodeButton ) {
+						if showQRCode {
+							QRCodeImageView(for: healthCardModel)
+						}
+					}
+				}
 			}
 			.onAppear {
 				healthCardModel.trustManager = trustManager

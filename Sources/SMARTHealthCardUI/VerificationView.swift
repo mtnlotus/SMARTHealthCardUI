@@ -20,6 +20,7 @@ public struct VerificationView: View {
 	public var body: some View {
 		VStack(alignment: .leading, spacing: 20) {
 			VerificationContent(for: healthCardModel)
+			QRCodeImageView(for: healthCardModel)
 			Spacer()
 		}
 		.padding(20)

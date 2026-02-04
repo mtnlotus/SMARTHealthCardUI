@@ -7,11 +7,16 @@
 
 import SwiftUI
 import SMARTHealthCard
+import ModelsR4
 
 struct VerificationContent: View {
 	@Environment(TrustManager.self) private var trustManager
 
 	private let healthCardModel: HealthCardModel
+	
+	private var patient: Patient? {
+		healthCardModel.fhirResources.first(where: {type(of: $0).resourceType == .patient}) as? Patient
+	}
 	
 	init(for healthCardModel: HealthCardModel) {
 		self.healthCardModel = healthCardModel
@@ -61,20 +66,31 @@ struct VerificationContent: View {
 		}
 	}
 	
-	@ViewBuilder private var qrCodeImage: some View {
-		if let uiImage = healthCardModel.qrCodeImage {
-			Section {
-				HStack {
-					Spacer()
-					Image(uiImage: uiImage)
-						.interpolation(.none)
-						.resizable()
-						.scaledToFit()
-						.frame(width: 200, height: 200)
-					Spacer()
-				}
-			}
+	private var entryTypes: [ResourceType] {
+		healthCardModel.fhirResources.map { type(of: $0).resourceType }
+	}
+	
+	private var listedTypes: [ResourceType] = [
+		.patient, .goal, .condition, .medication, .immunization, .procedure, .serviceRequest, .observation
+	]
+	
+	private var summaryTypes: [ResourceType] {
+		listedTypes.filter { entryTypes.contains($0) }
+	}
+	
+	/// Build a simple comma-separated summary of  categories present in the health card entries.
+	private var summaryText: String {
+		let names = summaryTypes.map { $0.rawValue }
+		if names.isEmpty {
+			return ""
 		}
+		if names.count == 1 {
+			return names[0]
+		}
+		// Oxford comma style: "A, B, and C"
+		let allButLast = names.dropLast().joined(separator: ", ")
+		let last = names.last!
+		return "\(allButLast), and \(last)"
 	}
 	
 	var body: some View {
@@ -105,13 +121,11 @@ struct VerificationContent: View {
 						Text("\(expiresDate.mediumDateTimeFormat)")
 					}
 				}
-				
-				qrCodeImage
-				
-				HStack {
-					Text("Contains \(healthCardModel.fhirResources.count) entries")
-					Spacer()
+				if let patient = patient {
+					ResourceSummary(patient)
 				}
+				
+				Text("Contains \(healthCardModel.fhirResources.count) entries including \(summaryText).")
 			}
 		}
 	}
@@ -119,6 +133,7 @@ struct VerificationContent: View {
 
 #Preview {
 	@Previewable @State var trustManager = TrustManager()
+	@Previewable @State var terminologyManager = TerminologyManager()
 	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	VStack(alignment: .leading, spacing: 20) {
@@ -127,4 +142,5 @@ struct VerificationContent: View {
 	}
 	.padding(20)
 	.environment(trustManager)
+	.environment(terminologyManager)
 }
