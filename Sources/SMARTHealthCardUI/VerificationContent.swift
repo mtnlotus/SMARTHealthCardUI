@@ -66,33 +66,6 @@ struct VerificationContent: View {
 		}
 	}
 	
-	private var entryTypes: [ResourceType] {
-		healthCardModel.fhirResources.map { type(of: $0).resourceType }
-	}
-	
-	private var listedTypes: [ResourceType] = [
-		.patient, .goal, .condition, .medication, .immunization, .procedure, .serviceRequest, .observation
-	]
-	
-	private var summaryTypes: [ResourceType] {
-		listedTypes.filter { entryTypes.contains($0) }
-	}
-	
-	/// Build a simple comma-separated summary of  categories present in the health card entries.
-	private var summaryText: String {
-		let names = summaryTypes.map { $0.rawValue }
-		if names.isEmpty {
-			return ""
-		}
-		if names.count == 1 {
-			return names[0]
-		}
-		// Oxford comma style: "A, B, and C"
-		let allButLast = names.dropLast().joined(separator: ", ")
-		let last = names.last!
-		return "\(allButLast), and \(last)"
-	}
-	
 	var body: some View {
 		if let smartHealthCard = healthCardModel.healthCardPayload {
 			Group {
@@ -125,7 +98,7 @@ struct VerificationContent: View {
 					ResourceSummary(patient)
 				}
 				
-				Text("Contains \(healthCardModel.fhirResources.count) entries including \(summaryText).")
+				Text("Contains \(healthCardModel.fhirResources.count) entries including \(healthCardModel.contentSummaryText).")
 			}
 		}
 	}
