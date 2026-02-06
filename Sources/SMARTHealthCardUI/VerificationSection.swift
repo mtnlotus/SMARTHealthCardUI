@@ -36,7 +36,6 @@ public struct VerificationSection: View {
 				.textCase(.none)
 		}
 		.animation(.default, value: showQRCode)
-		.listRowInsets(.init(top: 5, leading: 5, bottom: 5, trailing: 5))
 	}
 	
     public var body: some View {
