@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import SMARTHealthCard
 import ModelsR4
+import SMARTHealthCard
+import FHIRFoundation
 
 struct VerificationContent: View {
 	@Environment(TrustManager.self) private var trustManager

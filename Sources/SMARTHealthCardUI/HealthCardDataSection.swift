@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import SMARTHealthCard
 import ModelsR4
+import SMARTHealthCard
+import FHIRFoundation
 
 public struct HealthCardDataSection: View {
 	

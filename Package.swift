@@ -20,6 +20,7 @@ let package = Package(
 		.package(url: "https://github.com/apple/FHIRModels.git", "0.7.0"..<"1.0.0"),
 //		.package(url: "https://github.com/mtnlotus/SMARTHealthCard.git", branch: "main"),
 		.package(name: "SMARTHealthCard", path: "../SMARTHealthCard"),
+		.package(name: "FHIRFoundation", path: "../FHIRFoundation"),
 		.package(url: "https://github.com/twostraws/CodeScanner.git", "2.5.2"..<"3.0.0"),
 	],
     targets: [
@@ -30,9 +31,9 @@ let package = Package(
 			dependencies: [
 				.product(name: "ModelsR4", package: "FHIRModels"),
 				.product(name: "SMARTHealthCard", package: "SMARTHealthCard"),
+				.product(name: "FHIRFoundation", package: "FHIRFoundation"),
 				.product(name: "CodeScanner", package: "CodeScanner"),
-			],
-			resources: [.process("BundleResources")]
+			]
 		),
         .testTarget(
             name: "SMARTHealthCardUITests",

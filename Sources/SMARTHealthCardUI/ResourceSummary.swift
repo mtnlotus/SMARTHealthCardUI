@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ModelsR4
+import FHIRFoundation
 import OSLog
 
 public struct ResourceSummary: View {

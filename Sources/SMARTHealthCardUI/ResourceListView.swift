@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import SMARTHealthCard
 import ModelsR4
+import SMARTHealthCard
+import FHIRFoundation
 
 public struct ResourceTypeRow: View {
 	
@@ -76,7 +77,7 @@ public struct ResourceSectionView: View {
 	}
 	
 	var models: [ResourceModel] {
-		var models = resourceModels.filter { excludeTypes.contains($0.resourceType) == false }
+		let models = resourceModels.filter { excludeTypes.contains($0.resourceType) == false }
 		
 		if !includeTypes.isEmpty {
 			return models.filter { includeTypes.contains($0.resourceType) == true }

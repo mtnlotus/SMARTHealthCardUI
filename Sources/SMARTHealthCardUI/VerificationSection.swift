@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SMARTHealthCard
+import FHIRFoundation
 
 public struct VerificationSection: View {
 	@Environment(TrustManager.self) private var trustManager
@@ -39,11 +40,11 @@ public struct VerificationSection: View {
 	}
 	
     public var body: some View {
-		if let smartHealthCard = healthCardModel.healthCardPayload {
+		if let _ = healthCardModel.healthCardPayload {
 			Section(header: Text("Record Verification"), footer: Text(verificationFooter)) {
 				VerificationContent(for: healthCardModel)
 				
-				if let image = healthCardModel.qrCodeImage {
+				if let _ = healthCardModel.qrCodeImage {
 					Section(header: showQRCodeButton ) {
 						if showQRCode {
 							QRCodeImageView(for: healthCardModel)
@@ -59,11 +60,13 @@ public struct VerificationSection: View {
 }
 
 #Preview {
+	@Previewable @State var terminologyManager = TerminologyManager()
 	@Previewable @State var trustManager = TrustManager()
 	@Previewable @State var healthCardModel = HealthCardModel(numericSerialization: PreviewData.qrCodeNumeric)
 	
 	List {
 		VerificationSection(for: healthCardModel)
 	}
+	.environment(terminologyManager)
 	.environment(trustManager)
 }

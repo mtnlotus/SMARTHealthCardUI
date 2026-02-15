@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import ModelsR4
+import FHIRFoundation
 
 public protocol DisplayableResource: Resource {
 	var icon: Image? { get }

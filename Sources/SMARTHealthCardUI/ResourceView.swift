@@ -8,6 +8,7 @@
 import SwiftUI
 import ModelsR4
 import SMARTHealthCard
+import FHIRFoundation
 
 struct ResourceView: View {
 	let resourceModel: ResourceModel

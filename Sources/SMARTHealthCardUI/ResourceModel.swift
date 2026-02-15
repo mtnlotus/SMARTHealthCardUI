@@ -8,6 +8,7 @@
 import SwiftUI
 import class ModelsR4.Resource
 import enum ModelsR4.ResourceType
+import FHIRFoundation
 
 @Observable
 public class ResourceModel: Identifiable {

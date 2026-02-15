@@ -9,7 +9,7 @@ import SMARTHealthCard
 
 public extension HealthCardModel {
 	
-	public var resourceModels: [ResourceModel] {
+	var resourceModels: [ResourceModel] {
 		fhirResources.map { ResourceModel($0) }
 	}
 	

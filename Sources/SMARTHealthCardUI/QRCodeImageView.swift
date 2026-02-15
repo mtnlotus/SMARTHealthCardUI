@@ -24,7 +24,9 @@ struct QRCodeImageView: View {
 					.interpolation(.none)
 					.resizable()
 					.scaledToFit()
-					.frame(width: 250, height: 250)
+					.frame(maxWidth: 300, maxHeight: 300)
+					// SHC spec aims for 40mm x 40mm QR code when printed = 240 points on iPhone 16 Pro Max
+					// Choose a bit larger maxWidth of 300 for screen display
 				Spacer()
 			}
 		}

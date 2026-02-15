@@ -23,7 +23,7 @@ public extension HealthCardModel {
 	}
 	
 	/// Build a simple comma-separated summary of categories present in the health card entries.
-	public var contentSummaryText: String {
+	var contentSummaryText: String {
 		let names = summaryTypes.map { $0.rawValue }
 		if names.isEmpty {
 			return ""
