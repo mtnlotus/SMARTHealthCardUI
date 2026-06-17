@@ -28,8 +28,8 @@ public struct MainView: View {
 				
 				SMARTHealthCardView(for: healthCardModel)
 			}
-			.navigationDestination(for: Resource.self) { resource in
-				ResourceDetailView(resource)
+			.navigationDestination(for: ResourceProxy.self) { proxy in
+				ResourceDetailView(proxy.get())
 			}
 			.navigationTitle("SMART Health Card")
 		}

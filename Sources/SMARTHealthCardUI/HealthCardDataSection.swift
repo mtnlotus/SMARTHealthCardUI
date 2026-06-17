@@ -53,8 +53,8 @@ public struct HealthCardDataSection: View {
 		.navigationTitle("SMART Health Card")
 		.environment(terminologyManager)
 		.environment(trustManager)
-		.navigationDestination(for: Resource.self) { resource in
-			ResourceDetailView(resource)
+		.navigationDestination(for: ResourceProxy.self) { proxy in
+			ResourceDetailView(proxy.get())
 		}
 	}
 }

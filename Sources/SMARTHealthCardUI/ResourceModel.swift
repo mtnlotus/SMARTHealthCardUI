@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import class ModelsR4.Resource
+import protocol ModelsR4.Resource
 import enum ModelsR4.ResourceType
 import FHIRFoundation
 
@@ -15,13 +15,13 @@ public class ResourceModel: Identifiable {
 	
 	public let id: String = UUID().uuidString
 	
-	public let resource: Resource
+	public let resource: any Resource
 	
 	public var displayableResource: DisplayableResource? {
 		resource as? DisplayableResource
 	}
 	
-	public init(_ resource: Resource) {
+	public init(_ resource: any Resource) {
 		self.resource = resource
 		
 		if let displayableResource = resource as? DisplayableResource {

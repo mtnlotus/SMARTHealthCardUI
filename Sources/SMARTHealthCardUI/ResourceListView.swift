@@ -114,8 +114,8 @@ public struct ResourceSectionView: View {
 			ResourceSectionView(models, exclude: [.patient])
 			ResourceSectionView(models)
 		}
-		.navigationDestination(for: Resource.self) { resource in
-			ResourceDetailView(resource)
+		.navigationDestination(for: ResourceProxy.self) { proxy in
+			ResourceDetailView(proxy.get())
 		}
 	}
 	.environment(healthCareModel)

@@ -11,16 +11,16 @@ import SMARTHealthCard
 import FHIRFoundation
 
 public struct ResourceDetailView: View {
-	private let resource: Resource
+	private let resource: any Resource
 	private let resourceModel: ResourceModel
-	
+
 	private var resourceJSON: String? {
 		let jsonEncoder = JSONEncoder()
 		jsonEncoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-		return String(data: try! jsonEncoder.encode(resource), encoding: .utf8)
+		return String(data: try! jsonEncoder.encode(ResourceProxy(with: resource)), encoding: .utf8)
 	}
-	
-	public init(_ resource: Resource) {
+
+	public init(_ resource: any Resource) {
 		self.resource = resource
 		self.resourceModel = ResourceModel(resource)
 	}

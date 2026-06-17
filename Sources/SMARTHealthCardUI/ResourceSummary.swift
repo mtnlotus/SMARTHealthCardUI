@@ -21,13 +21,13 @@ public struct ResourceSummary: View {
 		self.showNavigation = showNavigation
 	}
 	
-	public init(_ resource: Resource) {
+	public init(_ resource: any Resource) {
 		self.init(resourceModel: ResourceModel(resource))
 	}
 	
 	public var body: some View {
 		VStack(alignment: .leading, spacing: 5) {
-			NavigationLink(value: showNavigation ? resourceModel.resource : nil) {
+			NavigationLink(value: showNavigation ? ResourceProxy(with: resourceModel.resource) : nil) {
 				HStack(spacing: 10) {
 					if let icon = resourceModel.icon {
 						icon
