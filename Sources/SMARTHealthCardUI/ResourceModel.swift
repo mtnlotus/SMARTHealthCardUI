@@ -17,14 +17,14 @@ public class ResourceModel: Identifiable {
 	
 	public let resource: any Resource
 	
-	public var displayableResource: DisplayableResource? {
-		resource as? DisplayableResource
+	public var displayableResource: (any DisplayableResource)? {
+		resource as? any DisplayableResource
 	}
 	
 	public init(_ resource: any Resource) {
 		self.resource = resource
 		
-		if let displayableResource = resource as? DisplayableResource {
+		if let displayableResource = resource as? any DisplayableResource {
 			title = displayableResource.title
 			detail = displayableResource.detail
 		}
